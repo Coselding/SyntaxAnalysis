@@ -28,8 +28,10 @@ void analysis(void);
 int main()
 {
     //算法4.2 构造预测分析表
+    // 遍历G的每个产生式
     for (auto itG = G.begin(), itFirst = First.begin(); itG != G.end() && itFirst != First.end(); ++itG, ++itFirst)
-    {
+    {    
+        // 非终结符下标转换
         int x = index.at(*(itG->begin()));
         for (auto first = itFirst->begin(); first != itFirst->end(); ++first)
         {
@@ -99,6 +101,7 @@ void analysis(void)
         string str2(ip, s.end());
         cout << left << setw(10) << str1 << right << setw(20) << str2 << "\t";
 
+        // 栈顶和当前输入符号
         top = analyStack.back();
         cur = *ip;
 
@@ -106,7 +109,7 @@ void analysis(void)
         if (isalpha(cur))
             cur = 'i';
         else if (isdigit(cur))
-                cur = 'n';
+            cur = 'n';
 
         // 栈顶是终结符号或$
         if (terminal.find(top) != terminal.npos || top == '$')
@@ -123,17 +126,19 @@ void analysis(void)
                 return;
             }
         }
+        // 栈顶非终结符
         else
         {
             int x = index.at(top);
             int y = index.at(cur);
             // 产生式
             string production = table.at(x).at(y);
+            // 产生式非空
             if (!production.empty())
             {
                 analyStack.pop_back();
                 string expr(production.begin() + 3, production.end());
-                if (expr == "e")    // 空产生式
+                if (expr == "e")    // e产生式
                     expr = "";
                 // 逆序压栈
                 for (auto iter = expr.rbegin(); iter != expr.rend(); ++iter)
