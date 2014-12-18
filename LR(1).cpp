@@ -60,7 +60,7 @@ vector<vector<int> > goTo =
 
 int main()
 {
-    cout << "Please input a string:" << endl;
+    cout << "ÇëÊäÈë´ý·ÖÎö´®£º" << endl;
     string s;
     cin >> s;
     s.push_back('$');

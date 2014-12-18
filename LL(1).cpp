@@ -4,34 +4,35 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <stdexcept>
 
 using namespace std;
 
-// é¢„æµ‹åˆ†æè¡¨
+// Ô¤²â·ÖÎö±í
 vector<vector<string> > table(5, vector<string>(9));
-// æ–‡æ³•çš„äº§ç”Ÿå¼
+// ÎÄ·¨µÄ²úÉúÊ½
 vector<string> G = {"E->TA", "A->+TA", "A->-TA", "A->e", "T->FB", "B->*FB", "B->/FB", "B->e", "F->i", "F->(E)", "F->n"};
-// æ–‡æ³•ç¬¦å·åˆ°ä¸‹æ ‡è½¬æ¢
+// ÎÄ·¨·ûºÅµ½ÏÂ±ê×ª»»
 map<char, int> index = {{'E', 0}, {'A', 1}, {'T', 2}, {'B', 3}, {'F', 4}, {'i', 0}, {'n', 1}, {'+', 2}, {'-', 3}, {'*', 4}, {'/', 5}, {'(', 6}, {')', 7}, {'$', 8}, {'e', 9}};
-// ç»ˆç»“ç¬¦
+// ÖÕ½á·û
 string terminal("in+-*/()$");
-// éç»ˆç»“ç¬¦
+// ·ÇÖÕ½á·û
 string nonTerminal("EATBF");
-// äº§ç”Ÿå¼å³éƒ¨çš„firsté›†
+// ²úÉúÊ½ÓÒ²¿µÄfirst¼¯
 vector<string> First = {"i(n", "+", "-", "e", "i(n", "*", "/", "e", "i", "(", "n"};
-// éç»ˆç»“ç¬¦çš„followé›†
+// ·ÇÖÕ½á·ûµÄfollow¼¯
 vector<string> Follow = {"$)", "$)", "+-$)", "+-$)", "*/+-$)"};
 
 
-void analysis(void);
+int analysis(void);
 
 int main()
 {
-    //ç®—æ³•4.2 æ„é€ é¢„æµ‹åˆ†æè¡¨
-    // éå†Gçš„æ¯ä¸ªäº§ç”Ÿå¼
+    //Ëã·¨4.2 ¹¹ÔìÔ¤²â·ÖÎö±í
+    // ±éÀúGµÄÃ¿¸ö²úÉúÊ½
     for (auto itG = G.begin(), itFirst = First.begin(); itG != G.end() && itFirst != First.end(); ++itG, ++itFirst)
-    {    
-        // éç»ˆç»“ç¬¦ä¸‹æ ‡è½¬æ¢
+    {
+        // ·ÇÖÕ½á·ûÏÂ±ê×ª»»
         int x = index.at(*(itG->begin()));
         for (auto first = itFirst->begin(); first != itFirst->end(); ++first)
         {
@@ -50,68 +51,59 @@ int main()
             }
         }
     }
-
-    // è¾“å‡ºé¢„æµ‹åˆ†æè¡¨
-    cout << "é¢„æµ‹åˆ†æè¡¨ï¼š" << endl;
-    // è¾“å‡ºç»ˆç»“ç¬¦
+    // Êä³öÔ¤²â·ÖÎö±í
+    cout << "Ô¤²â·ÖÎö±í£º" << endl;
+    // Êä³öÖÕ½á·û
     for (string::size_type i = 0; i < terminal.size(); ++i)
     {
         cout << '\t' << terminal[i];
     }
     cout << endl;
-    // è¾“å‡ºéç»ˆç»“ç¬¦
+    // Êä³ö·ÇÖÕ½á·û
     for (string::size_type x = 0; x < nonTerminal.size(); ++x)
     {
         cout << nonTerminal[x];
-        // è¾“å‡ºäº§ç”Ÿå¼
+        // Êä³ö²úÉúÊ½
         for (string::size_type y = 0; y < table.at(x).size(); ++y)
             cout << '\t' << table.at(x).at(y);
         cout << endl;
     }
     cout << endl;
-
-    analysis();
+    return analysis();
     return 0;
 }
 
-// é¢„æµ‹åˆ†æè¿‡ç¨‹
-void analysis(void)
+// Ô¤²â·ÖÎö¹ı³Ì
+int analysis(void)
 {
-    cout << "è¯·è¾“å…¥å¾…åˆ†æç¬¦å·ä¸²ï¼š" << endl;
-
-    //è¾“å…¥ç¼“å†²åŒº
+    cout << "ÇëÊäÈë´ı·ÖÎö´®£º" << endl;
+    //ÊäÈë»º³åÇø
     string s;
     cin >> s;
     s.push_back('$');
-
-    //åˆ†ææ ˆ
+    //·ÖÎöÕ»
     vector<char> analyStack;
     analyStack.push_back('$');
     analyStack.push_back('E');
-
-    // æ ˆé¡¶å’Œå½“å‰è¾“å…¥
+    // Õ»¶¥ºÍµ±Ç°ÊäÈë
     char top = '\0', cur = '\0';
     auto ip = s.begin();
-    cout << endl << left << setw(10) << "æ ˆ" << right << setw(20) << "è¾“å…¥" << "\t" << "è¾“å‡º" << endl;
-
+    cout << endl << left << setw(10) << "Õ»" << right << setw(20) << "ÊäÈë" << "\t" << "Êä³ö" << endl;
     do
     {
-        // è¾“å‡ºå½“å‰æ ˆå’Œå½“å‰å‰©ä½™è¾“å…¥
+        // Êä³öµ±Ç°Õ»ºÍµ±Ç°Ê£ÓàÊäÈë
         string str1(analyStack.begin(), analyStack.end());
         string str2(ip, s.end());
         cout << left << setw(10) << str1 << right << setw(20) << str2 << "\t";
-
-        // æ ˆé¡¶å’Œå½“å‰è¾“å…¥ç¬¦å·
+        // Õ»¶¥ºÍµ±Ç°ÊäÈë·ûºÅ
         top = analyStack.back();
         cur = *ip;
-
-        // æ ‡è¯†ç¬¦åŠæ•°å­—å˜æ¢
+        // ±êÊ¶·û¼°Êı×Ö±ä»»
         if (isalpha(cur))
             cur = 'i';
         else if (isdigit(cur))
             cur = 'n';
-
-        // æ ˆé¡¶æ˜¯ç»ˆç»“ç¬¦å·æˆ–$
+        // Õ»¶¥ÊÇÖÕ½á·ûºÅ»ò$
         if (terminal.find(top) != terminal.npos || top == '$')
         {
             if (top == cur)
@@ -123,35 +115,45 @@ void analysis(void)
             else
             {
                 cout << "error" << endl;
-                return;
+                return -1;
             }
         }
-        // æ ˆé¡¶éç»ˆç»“ç¬¦
+        // Õ»¶¥·ÇÖÕ½á·û
         else
         {
             int x = index.at(top);
-            int y = index.at(cur);
-            // äº§ç”Ÿå¼
+            int y;
+            try
+            {
+                y = index.at(cur);
+            }
+            catch (out_of_range)
+            {
+                cout << "ÊäÈë×Ö·û·Ç·¨£¡" << endl;
+                return -2;
+            }
+            // ²úÉúÊ½
             string production = table.at(x).at(y);
-            // äº§ç”Ÿå¼éç©º
+            // ²úÉúÊ½·Ç¿Õ
             if (!production.empty())
             {
                 analyStack.pop_back();
                 string expr(production.begin() + 3, production.end());
-                if (expr == "e")    // eäº§ç”Ÿå¼
+                if (expr == "e")    // e²úÉúÊ½
                     expr = "";
-                // é€†åºå‹æ ˆ
+                // ÄæĞòÑ¹Õ»
                 for (auto iter = expr.rbegin(); iter != expr.rend(); ++iter)
                     analyStack.push_back(*iter);
-                // è¾“å‡ºäº§ç”Ÿå¼
+                // Êä³ö²úÉúÊ½
                 cout << production << endl;
             }
             else
             {
                 cout << "error" << endl;
-                return;
+                return -1;
             }
         }
     }
     while (top != '$');
+    return 0;
 }
