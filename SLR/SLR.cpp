@@ -74,27 +74,32 @@ int main()
         cout << "无法打开输出文件 fout.txt." << endl;
         return 1;
     }
+    //输入串
     string s;
     fin >> s;
     cout << "成功读取待分析串：" << endl << s << endl;
-
     int wid = s.length()+1;
     s.push_back('$');
+
+    //状态栈、符号栈
     vector<int> statusStack;
     vector<char> symbolStack;
     statusStack.push_back(0);
     symbolStack.push_back('$');
+
+    // 栈顶和当前输入
     int top = 0;
     char cur = '\0';
     auto ip = s.begin();
-    fout << endl << left << setw(wid+10) << "栈" << right << setw(wid) << "输入" << "    " << "分析动作" << endl;
+
+    //输出头
+    fout << left << setw(wid+10) << "栈" << right << setw(wid) << "输入" << "    " << "分析动作" << endl;
     do
     {
         // 输出当前栈和当前剩余输入
         stringstream tmp;
         for (vector<int>::size_type i = 0; i < statusStack.size(); ++i)
             tmp << symbolStack.at(i) << statusStack.at(i);
-
         string str1;
         tmp >> str1;
         string str2(ip, s.end());
@@ -103,8 +108,8 @@ int main()
         // 栈顶和当前输入符号
         top = statusStack.back();
         cur = *ip;
-        // 标识符及数字变换
 
+        // 标识符及数字变换
         if (isalpha(cur))
             cur = 'i';
         else if (isdigit(cur))
@@ -143,7 +148,7 @@ int main()
         {
             string production = G.at(abs(val));
             int len = production.length() - 3;
-            while (len--)
+            while (len--)    //弹栈
             {
                 statusStack.pop_back();
                 symbolStack.pop_back();
@@ -152,6 +157,7 @@ int main()
             char curA = production.at(0);
             int xx = topS;
             int yy = index.at(curA);
+            //压状态栈和符号栈
             symbolStack.push_back(curA);
             statusStack.push_back(goTo.at(xx).at(yy));
             fout << "reduce by " << production << endl;

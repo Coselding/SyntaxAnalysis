@@ -51,13 +51,22 @@ int main()
             }
         }
     }
+    // 写入同步信息
+    for (string::size_type i = 0; i < nonTerminal.length(); ++i)
+    {
+        int x = index.at(nonTerminal.at(i));
+        for (vector<string>::size_type j = 0; j < Follow.at(i).length(); ++j)
+        {
+            int y = index.at(Follow.at(i).at(j));
+            if (table.at(x).at(y).empty())
+                table[x][y] = "synch";
+        }
+    }
     // 输出预测分析表
     cout << "预测分析表：" << endl;
     // 输出终结符
     for (string::size_type i = 0; i < terminal.size(); ++i)
-    {
         cout << '\t' << terminal[i];
-    }
     cout << endl;
     // 输出非终结符
     for (string::size_type x = 0; x < nonTerminal.size(); ++x)
@@ -70,20 +79,19 @@ int main()
     }
     cout << endl;
     return analysis();
-    return 0;
 }
 
 // 预测分析过程
 int analysis(void)
 {
     ifstream fin("fin.txt");
-    if(!fin.is_open())
+    if (!fin.is_open())
     {
         cout << "输入文件不存在 fin.txt."  << endl;
         return 1;
     }
     ofstream fout("fout.txt");
-    if(!fout.is_open())
+    if (!fout.is_open())
     {
         cout << "无法打开输出文件 fout.txt." << endl;
         return 1;
@@ -93,31 +101,37 @@ int analysis(void)
     string s;
     fin >> s;
     cout << "成功读取待分析串：" << endl << s << endl;
-    int wid = s.length()+1;
-
+    int wid = s.length() + 1;
     s.push_back('$');
+
     //分析栈
     vector<char> analyStack;
     analyStack.push_back('$');
     analyStack.push_back('E');
+
     // 栈顶和当前输入
     char top = '\0', cur = '\0';
     auto ip = s.begin();
-    fout << endl << left << setw(wid+15) << "栈" << right << setw(wid) << "输入" << "    " << "输出" << endl;
+
+    // 输出头
+    fout << left << setw(wid + 10) << "栈" << right << setw(wid) << "输入" << "    " << "输出" << endl;
     do
     {
         // 输出当前栈和当前剩余输入
         string str1(analyStack.begin(), analyStack.end());
         string str2(ip, s.end());
-        fout << left << setw(wid+15) << str1 << right << setw(wid) << str2 << "    ";
+        fout << left << setw(wid + 10) << str1 << right << setw(wid) << str2 << "    ";
+
         // 栈顶和当前输入符号
         top = analyStack.back();
         cur = *ip;
+
         // 标识符及数字变换
         if (isalpha(cur))
             cur = 'i';
         else if (isdigit(cur))
             cur = 'n';
+
         // 栈顶是终结符号或$
         if (terminal.find(top) != terminal.npos || top == '$')
         {
@@ -129,13 +143,14 @@ int analysis(void)
             }
             else
             {
-                fout << "error" << endl;
-                break;
+                fout << "出错！ 不匹配，弹出" << top << endl;
+                analyStack.pop_back();
             }
         }
         // 栈顶非终结符
         else
         {
+            //坐标转换
             int x = index.at(top);
             int y;
             try
@@ -147,25 +162,34 @@ int analysis(void)
                 fout << "输入字符非法！" << endl;
                 break;
             }
+
             // 产生式
             string production = table.at(x).at(y);
             // 产生式非空
             if (!production.empty())
             {
-                analyStack.pop_back();
-                string expr(production.begin() + 3, production.end());
-                if (expr == "e")    // e产生式
-                    expr = "";
-                // 逆序压栈
-                for (auto iter = expr.rbegin(); iter != expr.rend(); ++iter)
-                    analyStack.push_back(*iter);
-                // 输出产生式
-                fout << production << endl;
+                if (production == "synch")    //同步
+                {
+                    fout << "出错！synch，弹出" << top << endl;
+                    analyStack.pop_back();
+                }
+                else    //正常分析
+                {
+                    analyStack.pop_back();
+                    string expr(production.begin() + 3, production.end());
+                    if (expr == "e")    //epsilon产生式
+                        expr = "";
+                    // 逆序压栈
+                    for (auto iter = expr.rbegin(); iter != expr.rend(); ++iter)
+                        analyStack.push_back(*iter);
+                    // 输出产生式
+                    fout << production << endl;
+                }
             }
-            else
+            else    //表项空白
             {
-                fout << "error" << endl;
-                break;
+                fout << "出错！空白，跳过" << *ip << endl;
+                ++ip;
             }
         }
     }
